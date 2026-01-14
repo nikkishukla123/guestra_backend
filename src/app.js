@@ -18,3 +18,6 @@ app.use('/items', itemRoutes);
 //price route
 const priceRoutes = require('./routes/price.routes');
 app.use('/items', priceRoutes);
+//booking route
+const bookingRoutes = require('./routes/booking.routes');
+app.use('/bookings', bookingRoutes);

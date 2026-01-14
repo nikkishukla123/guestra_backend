@@ -62,6 +62,31 @@ Tax Amount
 
 Final Payable Price (The "Grand Total")
 
+
+4. Availability & Booking System
+
+Items can optionally be marked as bookable using the `is_bookable` flag.
+
+Each bookable item defines:
+- Available days (e.g. Mon–Fri)
+- Fixed time slots (e.g. 10:00–11:00)
+
+### Available Slots API
+GET /bookings/:itemId/slots?date=YYYY-MM-DD
+
+
+This API:
+- Fetches all possible slots from the item
+- Removes already booked slots for the given date
+- Returns only free slots
+
+### Booking API
+POST /bookings/:itemId/book
+
+Before creating a booking, the system checks for existing bookings with the same item, date, and time slot to prevent double booking.
+
+This approach ensures correct slot availability and avoids time conflicts.
+
 🛠️ How to Set It Up
 Clone & Install:
 
@@ -85,4 +110,3 @@ Add-ons: Support for "extra cheese" or "extra toppings."
 
 Time-based Pricing: Happy hours (8 PM - 10 PM) where prices change automatically.
 
-Booking: Adding a calendar for slot management.

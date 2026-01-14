@@ -57,6 +57,25 @@ const itemSchema = new mongoose.Schema(
         }
       }
     ],
+
+    is_bookable: {
+      type: Boolean,
+      default: false
+    },
+    
+    availability: {
+      days: {
+        type: [String], // ["Mon", "Tue", "Wed"]
+        default: []
+      },
+      slots: [
+        {
+          start: String, // "10:00"
+          end: String    // "11:00"
+        }
+      ]
+    }
+    
     
   },
   { timestamps: true }
