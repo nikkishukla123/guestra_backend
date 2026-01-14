@@ -10,26 +10,31 @@ Layered Architecture: Keeping the code organized by separating Routes, Controlle
 
 🏗️ How the Project is Structured
 To keep the code clean, I’ve divided the folders by responsibility:
+src/
+├── models/        # Database schemas
+├── controllers/   # Request handling & validation
+├── routes/        # API endpoints
+├── services/      # Core business logic (pricing, tax)
+├── app.js         # Express app configuration
+├── server.js      # Server startup & DB connection
 
-Models: Where the database "blueprints" live.
 
-Controllers: The gatekeepers that handle requests and send back responses.
-
-Services: This is the heart of the app. All the math for pricing and taxes happens here.
-
-Routes: The URL paths (endpoints).
-
-💰 The Pricing Engine (Core Feature)
+Pricing Engine (Core Feature)
 The most important part of this project is that it doesn't just store a "final price." It calculates it every time you ask.
 
-Supported Pricing Types:
-Static: A simple fixed price (e.g., Coffee = ₹200).
+Supported Pricing Types
 
-Complimentary: Items that are always free (₹0).
+Static Pricing – Fixed price
 
-Discounted: Takes a base price and applies either a flat amount (₹50 off) or a percentage (10% off). It also makes sure the price never goes below zero.
+Complimentary Pricing – Always free
 
-Tiered (Usage-based): * Price changes based on how long you use something.
+Discounted Pricing – Flat or percentage discount
+
+Tiered Pricing – Price based on usage duration
+
+The pricing logic is implemented inside a dedicated service:
+
+services/pricing.service.js
 
 Example: A meeting room might be ₹300 for 1 hour, but ₹500 for 2 hours. The system automatically picks the right "slab."
 
