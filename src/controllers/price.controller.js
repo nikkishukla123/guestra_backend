@@ -21,6 +21,14 @@ exports.getItemPrice = async (req, res) => {
 
     item.requested_duration = duration;
     
+    //add ons
+    const selectedAddons = req.query.addons
+    ? req.query.addons.split(',')
+     : [];
+
+    item.selected_addons = selectedAddons;
+
+    
     const priceDetails = await calculateItemPrice(item);
 
     res.json({

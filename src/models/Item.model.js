@@ -74,7 +74,23 @@ const itemSchema = new mongoose.Schema(
           end: String    // "11:00"
         }
       ]
-    }
+    },
+    addons: [
+      {
+        name: {
+          type: String,
+          required: true
+        },
+        price: {
+          type: Number,
+          required: true
+        },
+        is_mandatory: {
+          type: Boolean,
+          default: false
+        }
+      }
+    ]
     
     
   },
