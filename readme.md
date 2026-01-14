@@ -1,41 +1,76 @@
 🚀 Guestara – Menu & Pricing Engine (Backend)
 
-This is the backend for a menu management system that handles complex pricing logic.
-Instead of just saving a price in a database, this system calculates the final bill at runtime based on rules like:
+This project is a backend system for managing menus, services, and bookings with real-world pricing logic.
+Instead of storing a fixed final price in the database, the system calculates prices dynamically at runtime based on business rules.
 
-Discounts
-
-Usage-based tiers
-
-Tax settings
+The main goal of this project was to focus on engineering thinking, not just CRUD APIs.
 
 🛠️ Tech Stack
 
-Node.js & Express – Core backend framework
+Node.js & Express – Backend framework
 
-MongoDB & Mongoose – Flexible data storage
+MongoDB & Mongoose – Database and ODM
 
-Layered Architecture – Clean separation of concerns
+Joi – Request validation
 
-🏗️ Project Structure
+Swagger (OpenAPI) – API documentation
 
-To keep the code clean and maintainable, the project is structured by responsibility:
+Layered Architecture – Clean separation of responsibilities
+
+🏗️ Overall Architecture
+
+The project follows a layered architecture to keep the code clean and maintainable.
 
 src/
-├── models/        # Database schemas
-├── controllers/   # Request handling & validation
-├── routes/        # API endpoints
+├── models/        # Database schemas (MongoDB)
+├── controllers/   # Handle requests & responses
+├── routes/        # API routes
 ├── services/      # Core business logic (pricing, tax)
-├── app.js         # Express app configuration
+├── validations/   # Joi validation schemas
+├── config/        # Swagger and app configs
+├── app.js         # Express app setup
 ├── server.js      # Server startup & DB connection
 
+Why this structure?
 
-This structure makes it easy to extend features without breaking existing logic.
+Controllers stay thin and readable
+
+Business logic lives in services
+
+Validation happens before data reaches the database
+
+New features can be added without breaking existing code
+
+📊 Data Modeling Decisions
+Category
+
+Stores tax configuration
+
+Uses is_active for soft deletes
+
+Item
+
+Belongs to a category
+
+Supports exactly one pricing type
+
+Can optionally support:
+
+Add-ons
+
+Booking availability
+
+Booking
+
+Stored in a separate collection
+
+Tracks actual slot reservations instead of rules
+
+This separation helps avoid data duplication and keeps the system scalable.
 
 💰 Pricing Engine (Core Feature)
 
-The most important part of this project is that it does not store a final price.
-Instead, the price is calculated every time the API is called.
+The pricing engine calculates prices every time the API is called instead of storing a final price.
 
 Supported Pricing Types
 
@@ -47,64 +82,54 @@ Discounted Pricing – Flat or percentage discount
 
 Tiered Pricing – Price based on usage duration
 
-All pricing logic is handled inside a dedicated service:
+All pricing logic is handled inside:
 
 services/pricing.service.js
 
-Example
+Tiered Pricing Example
+Up to 1 hour → ₹300  
+Up to 2 hours → ₹500  
 
-A meeting room might cost:
 
-₹300 for up to 1 hour
+If a user requests 1.5 hours, the system automatically selects the ₹500 tier.
 
-₹500 for up to 2 hours
-
-The system automatically picks the correct slab based on usage.
-
-📑 Key Features & Business Logic
 🧾 Tax Inheritance
 
-Tax is not stored on every item.
-Instead, items inherit tax from their Category.
+Tax is not stored at the item level.
 
-Example:
+How it works:
 
-If the Beverages category has a 5% tax
+Items inherit tax from their category
 
-Every drink under it automatically applies 5%
+Tax is applied dynamically during price calculation
 
 Why this approach?
-If tax rules change, you update it in one place instead of updating hundreds of items.
 
-🗑️ Soft Delete
+If tax rules change, updating one category automatically updates pricing for all related items — without touching item records.
 
-Data is never permanently deleted.
+🧩 Add-ons System
 
-Uses an is_active flag
+Items can define add-ons such as:
 
-Setting is_active: false hides the item from the menu
+Extra cheese
 
-Useful for history, reports, and real-world safety
+Olives
 
-🔍 Price Calculation API
-Endpoint
-GET /items/:id/price
+Packaging (mandatory)
 
-Returns
+Rules:
 
-Base Price
+Mandatory add-ons are always included
 
-Discount Amount
+Optional add-ons are included only when selected
 
-Tax Amount
+Add-ons are added before tax calculation
 
-Final Payable Price (Grand Total)
-
-This ensures all business rules are applied dynamically.
+This mirrors how real restaurant pricing works.
 
 📅 Availability & Booking System
 
-Items can optionally be marked as bookable using the is_bookable flag.
+Items can optionally be marked as bookable.
 
 Each bookable item defines:
 
@@ -112,35 +137,61 @@ Available days (e.g. Mon–Fri)
 
 Fixed time slots (e.g. 10:00–11:00)
 
-🔎 Available Slots API
+Available Slots API
 GET /bookings/:itemId/slots?date=YYYY-MM-DD
 
 
-What it does:
+This API:
 
-Fetches all possible slots from the item
+Reads all possible slots from the item
 
-Removes already booked slots for the given date
+Removes already booked slots
 
 Returns only free slots
 
-📝 Booking API
+Booking API
 POST /bookings/:itemId/book
 
 
-Before creating a booking, the system checks:
+Before creating a booking, the system checks for an existing booking with the same:
 
-Same item
+Item
 
-Same date
+Date
 
-Same time slot
+Time slot
 
-If a conflict exists, booking is rejected.
+This prevents double booking.
 
-This prevents double booking and ensures correct slot availability.
+🔍 Price Calculation API
+GET /items/:id/price
 
-⚙️ Setup Instructions
+
+Returns:
+
+Base price
+
+Discount
+
+Add-ons total
+
+Tax
+
+Final payable price
+
+This ensures all business rules are applied consistently.
+
+🗑️ Soft Delete Strategy
+
+Records are never permanently deleted.
+
+Uses is_active = false
+
+Keeps historical data intact
+
+Matches real production systems
+
+⚙️ How to Run the Project Locally
 1️⃣ Clone & Install
 git clone https://github.com/nikkishukla123/guestra_backend
 npm install
@@ -155,14 +206,48 @@ MONGO_URI=your_mongodb_connection_string
 3️⃣ Run the Server
 npm start
 
-🔮 Future Improvements
 
-Add-ons system (extra cheese, toppings, etc.)
+Swagger API docs will be available at:
 
-Time-based pricing (happy hours, peak pricing)
+http://localhost:5000/api-docs
 
-More automated tests
+🤔 Trade-offs & Simplifications
+
+Due to time constraints, some features were intentionally simplified or deferred:
+
+Add-on groups (choose 1 of many)
+
+Time-based dynamic pricing windows
+
+Advanced booking overlap logic
+
+The architecture is designed so these can be added later without major refactoring.
+
+🧠 Written Reflections
+Why did you choose MongoDB?
+
+MongoDB provides flexibility for evolving schemas, which was useful for handling different pricing types, add-ons, and booking structures.
+
+Three things I learned
+
+Designing pricing as runtime logic instead of static data
+
+Importance of separating business logic from controllers
+
+Validating APIs early using Joi to avoid bad data
+
+Hardest challenge
+
+Designing the pricing engine to handle multiple pricing strategies cleanly without mixing logic.
+
+What I would improve with more time
+
+Add automated tests
+
+Improve booking overlap handling
+
+Implement advanced add-on groups
 
 🙌 Final Note
 
-This project focuses on correct business logic, clean structure, and real-world backend thinking rather than just CRUD operations.
+This project focuses on clean architecture, correct business logic, and real-world backend design, rather than just implementing CRUD operations.

@@ -1,3 +1,7 @@
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+
+
 const express = require('express');
 
 const app = express();
@@ -21,3 +25,5 @@ app.use('/items', priceRoutes);
 //booking route
 const bookingRoutes = require('./routes/booking.routes');
 app.use('/bookings', bookingRoutes);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
