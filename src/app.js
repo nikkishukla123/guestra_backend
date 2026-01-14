@@ -15,3 +15,6 @@ module.exports = app;
 //item routes
 const itemRoutes = require('./routes/item.routes');
 app.use('/items', itemRoutes);
+//price route
+const priceRoutes = require('./routes/price.routes');
+app.use('/items', priceRoutes);

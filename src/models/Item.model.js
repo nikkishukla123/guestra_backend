@@ -31,7 +31,7 @@ const itemSchema = new mongoose.Schema(
     // pricing config
     pricing_type: {
       type: String,
-      enum: ['STATIC', 'COMPLIMENTARY', 'DISCOUNTED'],
+      enum: ['STATIC', 'COMPLIMENTARY', 'DISCOUNTED' ,'TIERED'],
       required: true,
     },
 
@@ -47,6 +47,17 @@ const itemSchema = new mongoose.Schema(
       type: String,
       enum: ['FLAT', 'PERCENT'],
     },
+    pricing_tiers: [
+      {
+        upto: {
+          type: Number, // hours
+        },
+        price: {
+          type: Number,
+        }
+      }
+    ],
+    
   },
   { timestamps: true }
 );
@@ -67,5 +78,22 @@ itemSchema.pre('save', function () {
     }
   }
 });
+// tiered logic
+itemSchema.pre('save', function () {
+  if (this.pricing_type === 'TIERED') {
+    if (!this.pricing_tiers || this.pricing_tiers.length === 0) {
+      throw new Error('pricing_tiers required for TIERED pricing');
+    }
+
+    const sorted = this.pricing_tiers.sort((a, b) => a.upto - b.upto);
+
+    for (let i = 1; i < sorted.length; i++) {
+      if (sorted[i].upto <= sorted[i - 1].upto) {
+        throw new Error('Tier ranges must not overlap');
+      }
+    }
+  }
+});
+
 
 module.exports = mongoose.model('Item', itemSchema);
