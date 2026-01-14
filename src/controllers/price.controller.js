@@ -9,7 +9,7 @@ exports.getItemPrice = async (req, res) => {
       return res.status(404).json({ error: 'Item not found or inactive' });
     }
 
-    // ✅ duration
+    // ✅  for tieredbduration
     const duration = Number(req.query.duration);
 
     // ✅ validation
