@@ -3,10 +3,19 @@ const router = express.Router();
 
 const {
   createItem,
-  getItems,
+  getItems
 } = require('../controllers/item.controller');
 
-router.post('/', createItem);
+const { validateBody } = require('../middlewares/validate');
+const { createItemSchema } = require('../validations/item.validation');
+
+router.post(
+  '/',
+  validateBody(createItemSchema),
+  createItem
+);
+
 router.get('/', getItems);
 
 module.exports = router;
+

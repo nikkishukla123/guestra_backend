@@ -3,10 +3,19 @@ const router = express.Router();
 
 const {
   createCategory,
-  getCategories,
+  getCategories
 } = require('../controllers/category.controller');
 
-router.post('/', createCategory);
+const { validateBody } = require('../middlewares/validate');
+const { createCategorySchema } = require('../validations/category.validation');
+
+router.post(
+  '/',
+  validateBody(createCategorySchema),
+  createCategory
+);
+
 router.get('/', getCategories);
 
 module.exports = router;
+
