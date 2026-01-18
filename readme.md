@@ -1,4 +1,5 @@
 # Guestara – Menu & Pricing Engine (Backend)
+loom link => https://www.loom.com/share/94adb24917124b25aacbd99e824fe9c9
 
 This project is a backend system for managing menus, services, and bookings with real-world pricing logic. Instead of storing a fixed final price in the database, the system calculates prices dynamically at runtime based on business rules.
 
